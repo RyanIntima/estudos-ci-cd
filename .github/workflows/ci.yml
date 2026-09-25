@@ -36,17 +36,4 @@ jobs:
               run: ruff check .
 
     build:
-        needs: 
-            - test
-            - lint
-        
-        runs-on: ubuntu-latest
-        
-        steps:
-            - name: Checkout 
-              uses: actions/checkout@v4
-
-            - name: Login Docker
-              use: docker/login-action@v4
-              with:
-                username: ${{ vars.DOKCERHUB_USERNAME}}
+       ## Build em desenvolvimento na branch "develop"
