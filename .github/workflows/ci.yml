@@ -31,6 +31,11 @@ jobs:
 
             - name: Configurar Python
               uses: actions/setup-python@v7
+              with:
+                python-version: '3.12'
+
+            - name: Instalar Ruff
+              run: pip install ruff
 
             - name: lint check
               run: ruff check .
@@ -46,7 +51,10 @@ jobs:
             - name: Checkout 
               uses: actions/checkout@v4
 
-            - name: Login Docker
-              use: docker/login-action@v4
+            - name: AWS access
+              uses: aws-actions/configure-aws-credentials@v6
               with:
-                username: ${{ vars.DOKCERHUB_USERNAME}}
+                aws-access-key-id: ${{secrets.KEY_ID_AWS}}
+                aws-secret-access-key: ${{secrets.ACCESS_KEY_AWS}}
+                aws-region: ${{secrets.AWS_REGION}}
+
