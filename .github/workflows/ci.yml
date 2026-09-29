@@ -15,6 +15,8 @@ jobs:
             
             - name: Configurar Python
               uses: actions/setup-python@v7
+              with:
+                python-version: '3.12'
 
             - name: Instalar dependencias
               run: pip install -r requirements.txt
@@ -31,9 +33,41 @@ jobs:
 
             - name: Configurar Python
               uses: actions/setup-python@v7
+              with:
+                python-version: '3.12'
+
+            - name: Instalar Ruff
+              run: pip install ruff
 
             - name: lint check
               run: ruff check .
 
     build:
-       ## Build em desenvolvimento na branch "develop"
+        needs:
+            - test
+            - lint
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: AWS access
+              uses: aws-actions/configure-aws-credentials@v6
+              with:
+                aws-access-key-id: ${{ secrets.KEY_ID_AWS }}
+                aws-secret-access-key: ${{ secrets.ACCESS_KEY_AWS }}
+                aws-region: ${{ secrets.AWS_REGION }}
+
+            - name: AWS login
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Build imagem
+              run: docker build -t ci-cd-testes:${{ github.sha }} .
+
+            - name: Tag SHA ECR
+              run: docker tag ci-cd-testes:${{ github.sha }} 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
+
+            - name: Push to ECR
+              run: docker push 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
