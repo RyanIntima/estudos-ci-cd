@@ -1,4 +1,4 @@
-from typing import List
+from typing import list
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -9,7 +9,7 @@ from ..database import get_db
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 
-@router.get("/", response_model=List[schemas.TaskOut])
+@router.get("/", response_model=list[schemas.TaskOut])
 def list_tasks(db: Session = Depends(get_db)):
     return db.query(models.Task).order_by(models.Task.id).all()
 
@@ -41,4 +41,3 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Task not found")
     db.delete(db_task)
     db.commit()
-    return None
