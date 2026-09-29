@@ -1,2 +1,2 @@
 [tool.ruff.lint]
-ignore = ["B008"]
+ignore = ["B008", "UP035", "UP006"]
