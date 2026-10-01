@@ -3,7 +3,7 @@ name: CI
 on:
     push:
         branches:
-            - main
+            - develop
 
 jobs:
     test:
@@ -43,28 +43,31 @@ jobs:
               run: ruff check .
 
     build:
-        needs: 
+        needs:
             - test
             - lint
-        
+
         runs-on: ubuntu-latest
-        
+
         steps:
-            - name: Checkout 
+            - name: Checkout
               uses: actions/checkout@v4
 
             - name: AWS access
               uses: aws-actions/configure-aws-credentials@v6
               with:
-                aws-access-key-id: ${{secrets.KEY_ID_AWS}}
-                aws-secret-access-key: ${{secrets.ACCESS_KEY_AWS}}
-                aws-region: ${{secrets.AWS_REGION}}
-                
+                aws-access-key-id: ${{ secrets.KEY_ID_AWS }}
+                aws-secret-access-key: ${{ secrets.ACCESS_KEY_AWS }}
+                aws-region: ${{ secrets.AWS_REGION }}
+
             - name: AWS login
               uses: aws-actions/amazon-ecr-login@v2
 
-            - name: build imagem
-              run: docker build -t ci-cd-testes:{{github.sha}} .
+            - name: Build imagem
+              run: docker build -t ci-cd-testes:${{ github.sha }} .
+
+            - name: Tag SHA ECR
+              run: docker tag ci-cd-testes:${{ github.sha }} 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
 
             - name: Push to ECR
-              run: docker push arn:aws:iam::461837195972:user/ci-cd-testes
+              run: docker push 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
