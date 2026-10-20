@@ -1,9 +1,15 @@
 name: CI
     
 on:
-    push:
-        branches:
-            - develop
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+        - main
+        - develop
 
 jobs:
     test:
@@ -17,6 +23,7 @@ jobs:
               uses: actions/setup-python@v7
               with:
                 python-version: '3.12'
+                cache: pip
 
             - name: Instalar dependencias
               run: pip install -r requirements.txt
@@ -51,9 +58,13 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4       
 
+            - name: Build imagem
+              run: docker build -t ci-cd-testes:${{ github.sha }} .
+              
             - name: AWS access
+              if: github.event_name == 'push'
               uses: aws-actions/configure-aws-credentials@v6
               with:
                 aws-access-key-id: ${{ secrets.KEY_ID_AWS }}
@@ -61,13 +72,13 @@ jobs:
                 aws-region: ${{ secrets.AWS_REGION }}
 
             - name: AWS login
+              if: github.event_name == 'push'
               uses: aws-actions/amazon-ecr-login@v2
-
-            - name: Build imagem
-              run: docker build -t ci-cd-testes:${{ github.sha }} .
-
+                              
             - name: Tag SHA ECR
+              if: github.event_name == 'push'
               run: docker tag ci-cd-testes:${{ github.sha }} 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
 
             - name: Push to ECR
+              if: github.event_name == 'push'
               run: docker push 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
