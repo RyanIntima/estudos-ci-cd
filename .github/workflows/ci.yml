@@ -80,7 +80,7 @@ jobs:
 
           - name: Build imagem
             run: docker build -t ci-cd-testes:${{ github.sha }} .
-.
+
           - name: AWS access
             uses: aws-actions/configure-aws-credentials@v6
             with:
