@@ -6,6 +6,7 @@ on:
       - main
       - develop
 
+
   pull_request:
     branches:
         - main
@@ -62,6 +63,28 @@ jobs:
         
       runs-on: ubuntu-latest
 
+      if: github.event_name == 'push'
+      
+      needs:
+        - test
+        - lint
+        
+      runs-on: ubuntu-latest
+
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v4   
+            
+          - name: Definir tag da imagem
+            run: |
+              if [ "${GITHUB_REF_NAME}" = "develop" ]; then
+                echo "IMAGE_TAG=dev-${GITHUB_SHA}" >> "$GITHUB_ENV"
+              elif [ "${GITHUB_REF_NAME}" = "main" ]; then
+                echo "IMAGE_TAG=prod-${GITHUB_SHA}" >> "$GITHUB_ENV"
+              else
+                echo "Branch não permitida para publicação: ${GITHUB_REF_NAME}"
+                exit 1
+              fi  
       steps:
           - name: Checkout
             uses: actions/checkout@v4   
@@ -79,7 +102,15 @@ jobs:
 
           - name: Build imagem
             run: docker build -t ci-cd-testes:${{ github.sha }} .
+          - name: Build imagem
+            run: docker build -t ci-cd-testes:${{ github.sha }} .
               
+          - name: AWS access
+            uses: aws-actions/configure-aws-credentials@v6
+            with:
+              aws-access-key-id: ${{ secrets.KEY_ID_AWS }}
+              aws-secret-access-key: ${{ secrets.ACCESS_KEY_AWS }}
+              aws-region: ${{ secrets.AWS_REGION }}
           - name: AWS access
             uses: aws-actions/configure-aws-credentials@v6
             with:
@@ -89,7 +120,11 @@ jobs:
 
           - name: AWS login
             uses: aws-actions/amazon-ecr-login@v2
+          - name: AWS login
+            uses: aws-actions/amazon-ecr-login@v2
                               
+          - name: Tag SHA ECR
+            run: docker tag ci-cd-testes:${{ github.sha }} 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
           - name: Tag SHA ECR
             run: docker tag ci-cd-testes:${{ github.sha }} 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
 
@@ -97,3 +132,5 @@ jobs:
             run: docker push 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
 
     
+          - name: Push to ECR
+            run: docker push 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
