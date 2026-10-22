@@ -71,7 +71,7 @@ jobs:
               with:
                 aws-access-key-id: ${{ secrets.KEY_ID_AWS }}
                 aws-secret-access-key: ${{ secrets.ACCESS_KEY_AWS }}
-                aws-region: ${{ secrets.AWS_REGION }}
+                aws-region: sa-east-1
 
             - name: AWS login
               if: github.event_name == 'push'
