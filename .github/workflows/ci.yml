@@ -93,7 +93,7 @@ jobs:
             uses: aws-actions/amazon-ecr-login@v2
                               
           - name: Tag SHA ECR
-            run: docker tag ci-cd-testes:${{ github.sha }} 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
+            run: docker tag ci-cd-testes:${{ github.sha }} 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${IMAGE_TAG}
 
           - name: Push to ECR
-            run: docker push 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${{ github.sha}}
+            run: docker push 461837195972.dkr.ecr.sa-east-1.amazonaws.com/ci-cd-testes:${IMAGE_TAG}
