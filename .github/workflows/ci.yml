@@ -69,7 +69,7 @@ jobs:
             
           - name: Definir tag da imagem
             run: |
-              SHOT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
+              SHORT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
 
               if [ "${GITHUB_REF_NAME}" = "develop" ]; then
                 echo "IMAGE_TAG=dev-${SHORT_SHA}" >> "$GITHUB_ENV"
